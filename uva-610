@@ -1,0 +1,203 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define F first
+#define S second
+#define pb push_back
+
+#define _ ios_base::sync_with_stdio(0);
+#define fastt ios_base::sync_with_stdio(false); cin.tie(0);
+#define prec  cout<<fixed<<setprecision(16);
+//# define sess cout<<endl;
+
+#define file freopen("000.txt","r",stdin);
+#define balsal cout<<"dhukse"<<endl;
+
+#define pi acos(-1.0)
+#define PI 3.141592653589793
+#define INF 1e9
+
+#define si(n)                        scanf("%d",&n)
+#define sii(a,b)                    scanf("%d%d",&a,&b)
+#define siii(a,b,c)                scanf("%d%d%d",&a,&b,&c)
+#define sl(a)                        scanf("%lld",&a)
+#define sll(a,b)                    scanf("%lld%lld",&a,&b)
+#define slll(a,b,c)                scanf("%lld%lld%lld",&a,&b,&c)
+#define sf(n)                       scanf("%lf",&n)
+#define ss(n)                       scanf("%s",n)
+
+#define it_multiset  std::multiset<int>::iterator it;
+#define it_mii std::map<int, int>::iterator it;
+
+#define MOD 1000000007
+#define mod  1000000007
+//#define con continue;
+//#define ret return
+#define mx_value 1e19
+
+
+int sett( int N,int pos)
+{
+    return N=N | (1<<pos);
+}
+int reset(int N,int pos)
+{
+    return N= N & ~(1<<pos);
+}
+bool check(int N,int pos)
+{
+    return (bool)(N & (1<<pos));
+}
+
+void update(long long &x, long long val)
+{
+    x = x+val;
+    if(x>mod)x-=mod;
+}
+
+void fast()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL), cout.tie(NULL);
+}
+
+int moves[4][2] = { {1,0} , {0,1} , {-1,0}, {0,-1} };
+
+typedef long long int ll;
+typedef  float flt;
+typedef double dbl;
+typedef vector<int >  vi;
+typedef pair < int , int > pii;
+typedef pair < ll , ll > pll;
+typedef map<int , int> mii;
+
+//bridge gulake bad dile baki component gula ekekta cycle hoy
+// articulation point gulake bad dile koto gula componnt hoy?
+//jotobar articulation point er jonno low[next]>=low[node] call hobe
+//totobar count_children[node]++ korbo
+//root er jonno ja ase tai ans hobe
+//root chara onnogular jonno count_children[node]+1 and hobe
+
+//root articulation point hobe jodi tar root children >1 hoy tai
+//root children variable e save rakhtesi er koyta children ase
+
+
+/*bridge, bi-directional, O(V+E)
+counter = time counter
+num[i] = discovery time of vertex i
+low[i] = vertex with minimum discovery time that can be reached from subtree with i*/
+
+#define MAXN 65536
+
+vector<int> g[MAXN];
+
+int vis[MAXN], vIdx, back[MAXN], depth[MAXN];
+
+int cutPoint[MAXN];
+
+void dfs(int u, int p, int root)
+{
+    back[u] = depth[u] = ++vIdx;
+    vis[u] = 1;
+    int son = 0;
+    for (int i = 0; i < g[u].size(); i++)
+    {
+        int v = g[u][i];
+        if (!vis[v])
+        {
+            dfs(v, u, root);
+            back[u] = min(back[u], back[v]);
+            son++;
+            if ((u == root && son > 1) || (u != root && back[v] >= depth[u]))
+                cutPoint[u]++;
+        }
+        else if (v != p)
+        {
+            back[u] = min(back[u], depth[v]);
+        }
+    }
+}
+//
+set<int> adjCutPt;
+int comSize = 0;
+void dfs(int u)
+{
+    vis[u] = 1, comSize++;
+    for (int i = 0; i < g[u].size(); i++)
+    {
+        int v = g[u][i];
+        if (cutPoint[v])	adjCutPt.insert(v);
+        if (cutPoint[v] || vis[v])
+            continue;
+        dfs(v);
+    }
+}
+int main()
+{
+#ifndef ONLINE_JUDGE
+    file;
+#endif // ONLINE_JUDGE
+
+    int n, m, x, y;
+    int cs = 0;
+    while(scanf("%d",&m) == 1 && m)
+    {
+        int used[MAXN] = {}, usedn = 0;
+        for (int i = 0; i < MAXN; i++)
+        {
+            g[i].clear();
+        }
+        n = 0;
+        for (int i = 0; i < m; i++)
+        {
+            sii(x,y);
+            n = max(n, max(x, y));
+            x--, y--;
+            used[x] = used[y] = 1;
+            g[x].push_back(y);
+            g[y].push_back(x);
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            usedn += used[i];
+        }
+        vIdx = 0;
+        for (int i = 0; i < n; i++)
+        {
+             vis[i] = cutPoint[i] = 0;
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            if (!vis[i] && used[i])
+            {
+                dfs(i, -1, i);
+            }
+        }
+
+        vector<int> bal;
+
+        for (int i = 0; i < n; i++)
+        {
+            vis[i] = 0;
+        }
+        for (int i = 0; i < n; i++)
+        {
+            if (!vis[i] && !cutPoint[i])
+            {
+                comSize = 0, adjCutPt.clear();
+                dfs(i);
+                if (adjCutPt.size() == 1)
+                    bal.push_back(comSize);
+            }
+        }
+
+        long long ways = 1, mn = bal.size();
+
+        for (int i = 0; i < bal.size(); i++)
+            ways *= bal[i];
+        if (bal.size() == 0)	ways = (long long) usedn * (usedn-1) / 2, mn = 2;
+        printf("Case %d: %lld %lld\n", ++cs, mn, ways);
+    }
+    return 0;
+}
