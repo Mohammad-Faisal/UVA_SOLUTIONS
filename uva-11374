@@ -1,0 +1,278 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define F first
+#define S second
+#define pb push_back
+
+#define _ ios_base::sync_with_stdio(0);
+#define fastt ios_base::sync_with_stdio(false); cin.tie(0);
+#define prec  cout<<fixed<<setprecision(16);
+//# define sess cout<<endl;
+
+#define file freopen("000.txt","r",stdin);
+#define balsal cout<<"dhukse"<<endl;
+
+#define pi acos(-1.0)
+#define PI 3.141592653589793
+#define INF 1e9
+
+#define si(n)                        scanf("%d",&n)
+#define sii(a,b)                    scanf("%d%d",&a,&b)
+#define siii(a,b,c)                scanf("%d%d%d",&a,&b,&c)
+#define sl(a)                        scanf("%lld",&a)
+#define sll(a,b)                    scanf("%lld%lld",&a,&b)
+#define slll(a,b,c)                scanf("%lld%lld%lld",&a,&b,&c)
+#define sf(n)                       scanf("%lf",&n)
+#define ss(n)                       scanf("%s",n)
+
+#define it_multiset  std::multiset<int>::iterator it;
+#define it_mii std::map<int, int>::iterator it;
+
+#define MOD 1000000007
+#define mod  1000000007
+//#define con continue;
+//#define ret return
+#define mx_value 1e19
+
+
+int sett( int N,int pos)
+{
+    return N=N | (1<<pos);
+}
+int reset(int N,int pos)
+{
+    return N= N & ~(1<<pos);
+}
+bool check(int N,int pos)
+{
+    return (bool)(N & (1<<pos));
+}
+
+void update(long long &x, long long val)
+{
+    x = x+val;
+    if(x>mod)x-=mod;
+}
+
+void fast()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL), cout.tie(NULL);
+}
+
+int moves[4][2] = { {1,0} , {0,1} , {-1,0}, {0,-1} };
+
+typedef long long int ll;
+typedef  float flt;
+typedef double dbl;
+typedef vector<int >  vi;
+typedef pair < int , int > pii;
+typedef pair < ll , ll > pll;
+typedef map<int , int> mii;
+
+#define N 10010
+
+vector < pair < pair < int , int > , int > > graph[N];
+
+
+pii dist[N][2];   //distance and used node
+int par[N][2];
+
+int diajkstra(int s , int t)
+{
+    priority_queue< pair<pii , pii >, vector< pair< pii, pii > >, greater< pair<pii , pii >  > > q;
+
+    dist[s][0].F = 0;
+    dist[s][0].S = -1;
+    par[s][0] = s;
+
+    q.push( make_pair(make_pair(0,s),make_pair(0,-1)));  //0 holo use hoise naki ar -1 holo use jodi hoy tahole jei node e use hoise
+
+    while(!q.empty())
+    {
+        pair< pii , pii > top = q.top();
+        q.pop();
+
+        int node = top.F.S;
+        int cost = top.F.F;
+        int used = top.S.F;
+        int used_node = top.S.S;
+
+        int loop = graph[node].size();
+
+        if(dist[node][used].F < cost)continue;
+
+        for(int i=0; i<loop; i++)
+        {
+            pair<pii, int> cur_node = graph[node][i];
+
+            int next_node = cur_node.F.F;
+            int next_dis = cur_node.F.S;
+            int type = cur_node.S;
+            //int used_node = cur_node.S.S;
+
+            if(!used)  //khoroc hoynai
+            {
+                //cout<<dist[next_node][type]<<" "<<dist[node][used]+next_dis<<endl;
+                if(  dist[next_node][type].F > dist[node][used].F+next_dis)
+                {
+
+                    dist[next_node][type].F= dist[node][used].F + next_dis;
+                    if(type)
+                    {
+                        q.push( make_pair(  make_pair(dist[next_node][type].F , next_node )  , make_pair(type , node) ) ); // ami use korlam
+                        dist[next_node][type].S = node;
+                        par[next_node][type] = node;
+                    }
+                    else
+                    {
+                        q.push( make_pair(  make_pair(dist[next_node][type].F , next_node )  , make_pair(type , -1) ) ); // ami use korlam na
+                        par[next_node][type] = node;
+                    }
+
+                    //q.push( make_pair ( make_pair (dist[next_node], next_node) , type) );
+                }
+            }
+            else  //khoroc hoise karon used= 1
+            {
+                if(type==0)
+                {
+                    if(dist[next_node][used].F > dist[node][used].F+next_dis)
+                    {
+                        dist[next_node][used].F = dist[node][used].F+next_dis;
+                        dist[next_node][used].S = used_node;
+                        par[next_node][used] = node;
+                        q.push(  make_pair(make_pair(dist[next_node][used].F, next_node) , make_pair(1,used_node)));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+int main()
+{
+
+#ifndef ONLINE_JUDGE
+    file;
+#endif // ONLINE_JUDGE
+
+//    int t;
+//    si(t);
+    int n,s,e;
+    int cs = 0;
+    while(cin>>n>>s>>e)
+    {
+        if(cs)printf("\n");
+        cs++;
+
+        //siii(n,s,e);
+
+        int m;
+
+        for(int i=1; i<=n; i++)
+        {
+            dist[i][0].F = 100000000;
+            dist[i][1].F = 100000000;
+
+            dist[i][0].S = -1;
+            dist[i][1].S = -1;
+
+            par[i][0] = -1;
+            par[i][1] = -1;
+            graph[i].clear();
+        }
+
+        si(m);
+        for(int i=0; i<m; i++)
+        {
+            int p,q,w;
+            siii(p,q,w);
+            //cout<<p<<" "<<q<<" "<<w<<endl;
+            graph[p].push_back( make_pair(make_pair(q,w),0));
+            graph[q].push_back( make_pair(make_pair(p,w),0));
+        }
+        si(m);
+        for(int i=0; i<m; i++)
+        {
+            int p,q,w;
+            siii(p,q,w);
+            graph[p].push_back( make_pair(make_pair(q,w),1));
+            graph[q].push_back( make_pair(make_pair(p,w),1));
+        }
+        int ans = diajkstra(s,e); //0 is the source and n-1 is the destination
+
+        if(dist[e][0].F<dist[e][1].F) //use kora lagenai
+        {
+            vector<int > bal;
+            int node = e;
+            while(1)
+            {
+                bal.push_back(node);
+                if(par[node][0]==node)
+                {
+                    break;
+                }
+                node = par[node][0];
+            }
+            reverse(bal.begin(),bal.end());
+            int loop = bal.size();
+
+            for(int i=0;i<loop;i++)
+            {
+                if(i==loop-1)printf("%d",bal[i]);
+                else printf("%d ",bal[i]);
+            }
+            printf("\nTicket Not Used\n");
+            printf("%d\n",dist[e][0]);
+        }
+        else
+        {
+            vector<int > bal;
+            int node = e;
+            int target_node =dist[e][1].S;
+            while(1)
+            {
+                bal.push_back(node);
+                if(par[node][1]==target_node)
+                {
+                    break;
+                }
+                node = par[node][1];
+            }
+            node = target_node;
+            target_node =  s;
+            while(1)
+            {
+                bal.push_back(node);
+                if(par[node][0]==target_node)
+                {
+                    if(par[node][0]!=node)
+                    {
+                        bal.push_back(target_node);
+                    }
+                    break;
+                }
+                node = par[node][0];
+            }
+            reverse(bal.begin(),bal.end());
+            int loop = bal.size();
+
+            for(int i=0;i<loop;i++)
+            {
+                if(i==loop-1)printf("%d",bal[i]);
+                else printf("%d ",bal[i]);
+            }
+            printf("\n%d\n",dist[e][1].S);
+            printf("%d\n",dist[e][1]);
+        }
+
+    }
+
+
+
+
+    return 0;
+}
